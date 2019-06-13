@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name=viewport content="width=device-width, initial-scale=1">
+<html>
+<head>
+	<title>ARC Performance Evaluation</title>
+	<link rel="shortcut icon" sizes="196x196" href="assets/img/arc_logo196.png">
+	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+	<script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+	<!-- <script type="text/javascript" src="bower_components/seiyria-bootstrap-slider/dist/bootstrap-slider.min.js"></script> -->
+	<!-- <script src="bower_components/tabletop/src/tabletop.js"></script> -->
+	<!-- <script src="bower_components/sheetsee/js/sheetsee.js"></script> -->
+	<script src="bower_components/moment/min/moment.min.js"></script>
+	<script src="bower_components/simple-statistics/dist/simple_statistics.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.9.3/lodash.min.js"></script>
+	<script src="bower_components/d3/d3.min.js"></script>
+	<script src="bower_components/d3/colorbrewer.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/4.1.7/highcharts.js"></script>
+	<script src="http://code.highcharts.com/modules/exporting.js"></script>
+	<script src="assets/js/export-csv.js"></script>
+	<script src="assets/js/hashchange.min.js"></script>
+
+	<script type="text/javascript" language="javascript" src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+
+	<script type="text/javascript" language="javascript" src="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.8/css/dataTables.bootstrap.min.css">
+	<script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.js'></script>
+	<script src='assets/js/leaflet.tooltip.js'></script>
+	<script src='assets/js/leaflet.label.js'></script>
+	<link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.css' rel='stylesheet' />
+	<!-- <link rel="stylesheet" type="text/css" href="bower_components/weather-icons/css/weather-icons.min.css"> -->
+	<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+	<!-- <link rel="stylesheet" type="text/css" href="bower_components/seiyria-bootstrap-slider/dist/css/bootstrap-slider.min.css"> -->
+	<link rel="stylesheet" type="text/css" href="assets/css/leaflet.tooltip.css">
+	<link rel="stylesheet" type="text/css" href="assets/css/leaflet.label.css">
+	<link href='http://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<style type="text/css">
+
+
+
+        .tab-content {
+        	padding-top:15px;
+        }
+        #chartSide {
+        	padding-top:15px;
+        }
+        #map {
+		    min-height: 600px;
+		    -moz-border-radius: 10px;
+			-webkit-border-radius: 10px;
+			border-radius: 10px; /* future proofing */
+			-khtml-border-radius: 10px; /* for old Konqueror browsers */
+        }
+        #summary-table{
+        	height:100px;
+        	overflow: scroll;
+        }
+        #mapTab {
+        	min-height: 100%;
+		    height: 100%;
+		    width: 100%;
+		    min-width: 100%;
+		    /*overflow: hidden;*/
+
+        }
+        #container {
+        	height: 100%;
+        	width: 100%;
+        	/*overflow: hidden;*/
+        }
+	    a {border: none;}
+	    #chart {
+	    	height:80%;
+	    	/*opacity:0.8;*/
+	    	/*position: absolute;*/
+	    	/*float: right;*/
+	    	/*bottom: 0px;*/
+	    	width: 100%;
+	    	/*display: none;*/
+	    }
+	    .vertical-center {
+			min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
+			min-height: 100vh; /* These two lines are counted as one :-)       */
+
+			display: flex;
+			align-items: center;
+		}
+	    .info {
+		    padding: 6px 8px;
+		    font: 14px/16px 'Droid Serif', serif;
+		    background: white;
+		    background: rgba(255,255,255,0.8);
+		    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+		    border-radius: 5px;
+		}
+		.info .info-controls h4 {
+		    margin: 0 0 5px;
+		    color: #777;
+		}
+		.info-controls {
+		    padding: 10px;
+		    font: 14px/16px 'Droid Serif', serif;
+		    background: white;
+		    background: rgba(255,255,255,1.0);
+		    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+		    border-radius: 5px;
+		    position:absolute; z-index:100; bottom:10px; left:10px;
+		    width: 650px;
+		}
+	    .legend {
+		    line-height: 18px;
+		    color: #555;
+		}
+		.legend i {
+		    width: 18px;
+		    height: 18px;
+		    float: left;
+		    margin-right: 8px;
+		    opacity: 0.7;
+		}
+		.legend .circle {
+		  border-radius: 50%;
+		  opacity:  1.0;
+		  width: 15px;
+		  height: 15px;
+		  margin-top: 0px;
+		}
+		#select-box {
+			border-style: dotted;
+			border-width: thin;
+			padding: 3px;
+			/*height: 200px;*/
+		}
+		#select-box h1{
+		    text-align: center;
+		    margin-top: -5px;
+		    height: 5px;
+		    line-height: 5px;
+		    font-size: 15px;
+		}
+
+		#select-box h1 span{
+		    background-color: white;
+		    opa
+		}
+		.input-simple:focus {
+			outline:0;
+		}
+		.input-simple {
+			border:0;
+    		border-bottom: 2px dotted;
+    		border-bottom-width: thin;
+		}
+		input label {
+			display: inline-block !important;
+		}
+		#filter-statement {
+			font-style: italic;
+			font-family: 'Droid Serif', serif;
+		}
+		select {
+			/*font-family: 'Helvetica', 'Arial' !important;*/
+			font-style: normal;
+		}
+		.spinner {
+		  display: inline-block;
+		  opacity: 0;
+		  width: 0;
+
+		  -webkit-transition: opacity 0.25s, width 0.25s;
+		  -moz-transition: opacity 0.25s, width 0.25s;
+		  -o-transition: opacity 0.25s, width 0.25s;
+		  transition: opacity 0.25s, width 0.25s;
+		}
+
+		.has-spinner.active {
+		  cursor:progress;
+		}
+
+		.has-spinner.active .spinner {
+		  opacity: 1;
+		  width: auto; /* This doesn't work, just fix for unkown width elements */
+		}
+
+		.has-spinner.btn-mini.active .spinner {
+		    width: 10px;
+		}
+
+		.has-spinner.btn-small.active .spinner {
+		    width: 13px;
+		}
+
+		.has-spinner.btn.active .spinner {
+		    width: 16px;
+		}
+
+		.has-spinner.btn-large.active .spinner {
+		    width: 19px;
+		}
+		.leaflet-tooltip p {
+			font-size: x-small;
+			margin: 0;
+		}
+		.verticalLine {
+		    border-left: thick solid #ff0000;
+		}
+		#tableTab {
+			overflow: scroll;
+		}
+	</style>
+</head>
+<body>
+	<nav class="navbar navbar-default" >
+  <div class="container">
+    <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">
+          	<span><img width="40" height="17" src="assets/img/arc_logo@2x.png"></span>
+          	<span style="position:relative;top:2px;">Project Evaluation</span>
+          </a>
+        </div>
+
+        <div id="navbar" class="navbar-collapse collapse">
+	          <ul id="myTabs" class="nav navbar-nav">
+	          	<li role="presentation" class="active" id="mapTabLink"><a href="#mapTab" role="tab" data-toggle="tab">Map</a></li>
+	          	<li role="presentation" id="tableTabLink"><a href="#tableTab">Table</a></li>
+	          </ul>
+	          <ul class="nav navbar-nav pull-right">
+	            <li><a href="#myModal" data-toggle="modal" data-target="#aboutModal">About</a></li>
+	          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+  </div>
+</nav>
+<div id="container">
+<!-- Tab panes -->
+<div class="tab-content col-sm-6" style="">
+	<div role="tabpanel" class="tab-pane active" id="mapTab">
+		<div id="map"></div>
+	</div>
+	<div role="tabpanel" class="tab-pane" id="tableTab" style="overflow:hidden;">
+		<div class="table-responsive" style="overflow:hidden;">
+			<button class="btn btn-primary pull-right" id="filterChart">Filter Data</button>
+			<button class="btn btn-default pull-right" id="clearFilter">Clear</button>
+			<table class="table table-hover arrivals-table" id="projectTable">
+			</table>
+		</div>
+	</div>
+</div>
+<div id="chartSide" class="col-sm-6">
+	<div id="chartPanel" style="height:500px;">
+		<div id="chart"></div>
+		<div id="data-summary"></div>
+		<div id="chartControls">
+			<!-- <p>Click a project on the map or chart for more info</p> -->
+			<!-- <p><strong>OR</strong></p> -->
+			<p>Manipulate the bubble chart with the controls below:</p>
+			<div class="row col-md-12">
+				<div class="col-md-6">
+					<!-- <div class="col-md-6"> -->
+					<div class="form-group">
+						<label class="control-label" for="xVariable">x</label>
+						<select type="text" id="xVariable" style="width:200px" class="form-control scatterVariable scatter-control" >
+						</select> 
+						<p class="small" id="xVariable-description">this variable does this</p>
+					</div>
+					<!-- vs. -->
+					<div class="form-group">
+						<label class="control-label" for="yVariable">y</label>
+						<select type="text" id="yVariable" style="width:200px" class="form-control scatterVariable scatter-control" >
+						</select>
+						<p class="small" id="yVariable-description">this variable does this</p>
+					</div>
+					<!-- <label class="control-label" for="bundleFilter">Filter by project</label>
+					<select  class="scatter-control" id="bundleFilter">
+						<option value="">All</option>
+						<option value="bundles">Bundles</option>
+						<option value="individuals">Individual</option>
+					</select> -->
+				</div>
+				<div class="col-md-6">
+					<!-- vs. -->
+					<div class="form-group">
+						<label class="control-label" for="rVariable">radius</label>
+						<select type="text" id="rVariable" style="width:200px" class="form-control scatterVariable scatter-control" >
+						</select> 
+						<p class="small" id="rVariable-description">this variable does this</p>
+					</div>
+					<!-- vs. -->
+					<div class="form-group">
+						<label class="control-label" for="colorVariable">color</label>
+						<select type="text" id="colorVariable" style="width:200px" class="form-control scatterVariable scatter-control" >
+						</select> 
+						<p class="small" id="colorVariable-description">this variable does this</p>
+					</div>
+					<label class="control-label" for="countyFilter">Filter by county</label>
+					<select  id="countyFilter">
+						<option value="">All</option>
+						<option value="Barrow">Barrow</option>
+						<option value="Cherokee">Cherokee</option>
+						<option value="Clayton">Clayton</option>
+						<option value="Cobb">Cobb</option>
+						<option value="Coweta">Coweta</option>
+						<option value="DeKalb">DeKalb</option>
+						<option value="Douglas">Douglas</option>
+						<option value="Fayette">Fayette</option>
+						<option value="Forsyth">Forsyth</option>
+						<option value="Fulton">Fulton</option>
+						<option value="Gwinnett">Gwinnett</option>
+						<option value="Henry">Henry</option>
+						<option value="Newton">Newton</option>
+						<option value="Paulding">Paulding</option>
+						<option value="Rockdale">Rockdale</option>
+						<option value="Spalding">Spalding</option>
+						<option value="Walton">Walton</option>
+
+					</select>
+				</div>
+	        </div>
+	        
+	        
+        </div>
+	</div>
+	
+</div>
+</div>
+<div id="aboutModal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">ARC Project Evaluation Tool</h4>
+      </div>
+      <div class="modal-body">
+
+<p>This tool was created as a way to visualize all of the data being used in transportation project evaluations for the region.  It is currently restricted to federally funded capacity projects, but we hope it will continue to grow until each project and its data are represented. The ARC wants to open up our data and our process used to evaluate projects for users to manipulate and compare.</p>
+<h4>Process</h4>
+<p>In order to fully understand this data you have to know where it came from.  Here is a brief summary of what these data mean and how we calculated them.</p>
+<h4>Need and Performance</h4>
+<p>The <strong>current measures</strong> are all based on real world data where available.  These measures determine the level of need and give a broad picture of what the conditions of the road are today.</p>
+<p>The <strong>future measures</strong> are all calculated by running each project through a transportation demand model, a process which calculates individual project performance for each measure.</p>
+<p>The current and future measures are then indexed, weighted and summed into a need score and a performance score, respectively.</p>
+<h4>Benfit/Cost (BC) Ratios</h4>
+<p>BC ratios monetize all of the costs and benefits of transportation projects to determine the overall value of each project.  Since some projects are intended to solve current issues and some are meant to relieve anticipated problems, BC ratios for all projects were calculate for both 2015 and 2040 conditions.</p>
+
+        <!-- <p>Each time the ARC updates the Regional Transportation Plan (RTP) all of the projects must be reevaluated.  This tool was created as a way to visualize all of the data being used in transportation project evaluations for the region.  It is currently restricted to federally funded capacity projects, but we hope it will continue to grow until each project and its data are represented. This tool allows for simple data analysis and comparisons, as well as increases the transparency of ARC’s project evaluation methodology. There are many different ways to evaluate projects including performance measure based indices and by calculating the Benefit/Cost (BC) Ratios. This year ARC chose to use both methods.</p>
+		<h4>Need and Performance</h4>
+		<p>The current need, measures are all based on real world data where available.  These measures determine the level of need a corridor has and gives a broad picture of what the conditions of the road are today.  The future measures are all calculated by running each project individually through a transportation demand model and gauging that project’s performance on each measure.  </p>
+		<p>The current need and future performance measures are indexed separately from 0-1, then weighted and summed into a current score and a future score, respectively.  The weights and measures were chosen to reflect the visions and goals that make up the basis for the policies and objections in The Region’s Plan.</p>
+		<h4>BC Ratio</h4>
+		<p>BC ratios monetize all costs and benefits of transportation projects to determine the overall value of each project.  Since some projects are intended to solve current issues and some are meant to relieve anticipated problems, BC ratios for all projects were calculate assuming both 2015 and 2040 conditions. All BC ratios were also found separately for each project to clarify each project’s effect on the transportation system.</p> -->
+		<h5>List of variables</h5>
+		<div id="variable-list">
+		</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<script type="text/javascript" src="assets/js/script.js"></script>
+</body>
+
+</html>
