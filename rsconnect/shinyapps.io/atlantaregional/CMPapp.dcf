@@ -1,0 +1,13 @@
+name: CMPapp
+title: CMPapp
+username:
+account: atlantaregional
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 822175
+bundleId: 2039036
+url: https://atlantaregional.shinyapps.io/CMPapp/
+when: 1556213738.17403
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: 2018join1.rds|2018speed.rds
